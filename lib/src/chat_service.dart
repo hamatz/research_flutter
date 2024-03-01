@@ -136,10 +136,10 @@ class ChatService {
         required StreamController<dynamic> controller,
   }) async {
     try {
-      final request = http.Request('POST', Uri.parse("$endpoint/models/$chatRequest.model/completions"))
+      final request = http.Request('POST', Uri.parse(endpoint))
         ..headers.addAll({
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
+              'Content-Type': 'application/json',
+              'api-key': apiKey ,
         })
         ..body = chatRequest.toJson();
       final streamedResponse = await http.Client().send(request);
@@ -165,12 +165,12 @@ class ChatService {
                     if (parsedData['choices'] != null &&
                         parsedData['choices'].isNotEmpty) {
                       String? content = parsedData['choices'][0]['delta']['content'];
-                      print('content: $content');
+                      print('content: $parsedData');
 
                       if (content != null) { // データの中身の存在確認はするけどChunkそのまま返した方が便利だと思うので敢えてこっちをセットしてる
                         collectedChunks.add(parsedData);
+                        controller.add(parsedData);
                       }
-                      controller.add(parsedData);
                     }
                     bufferedChunk = bufferedChunk.replaceFirst(singleChunk, "");
                   }
