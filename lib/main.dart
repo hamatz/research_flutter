@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:chat_sample_app/src/chat_service.dart' as cs;
+import 'package:chat_sample_app/src/services/chat_service.dart' as cs;
 
 const AZURE_OPENAI_KEY = "Azure OpenAIのアクセストークン";
 const AZURE_API_BASE_URL="ベースURL";
