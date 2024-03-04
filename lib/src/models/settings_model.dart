@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:chat_sample_app/src/widgets/text_setting_item.dart';
+import 'package:chat_sample_app/src/widgets/profile_setting_item.dart';
 
 abstract class SettingItem {
   Widget buildWidget(BuildContext context);
@@ -13,21 +14,16 @@ class UserProfileSettingItem extends SettingItem {
 
   @override
   Widget buildWidget(BuildContext context) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundImage: NetworkImage(imagePath),
-      ),
-      title: Text(username),
-    );
+    return UserProfileSettingItemWidget(username: username, imagePath: imagePath);
   }
 }
 
 class TextSettingItem extends SettingItem {
   final String title;
-  final String? value;
+  final String value;
   final bool isEncrypted;
 
-  TextSettingItem({required this.title, this.value, required this.isEncrypted});
+  TextSettingItem({required this.title, required this.value, required this.isEncrypted});
 
   @override
   Widget buildWidget(BuildContext context) {

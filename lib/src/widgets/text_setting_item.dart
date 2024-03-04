@@ -1,11 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:chat_sample_app/src/services/crypt_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TextSettingItemWidget extends StatefulWidget {
   final String title;
-  final String? value;
+  final String value;
   final bool isEncrypted;
 
-  const TextSettingItemWidget({super.key, required this.title, this.value, required this.isEncrypted});
+  const TextSettingItemWidget({super.key, required this.title, required this.value, required this.isEncrypted});
 
   @override
   TextSettingItemWidgetState createState() => TextSettingItemWidgetState();
@@ -13,13 +16,35 @@ class TextSettingItemWidget extends StatefulWidget {
 
 class TextSettingItemWidgetState extends State<TextSettingItemWidget> {
   late TextEditingController _controller;
+  final cryptoService = CryptoService();
+  final storage = FlutterSecureStorage();
   late bool _isEncrypted;
+  late String _value;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.value);
     _isEncrypted = widget.isEncrypted;
+    _value = widget.value;
+  }
+
+  Future<bool> save() async {
+    Map<String, dynamic> settingData = {};
+    String value = _value;;
+    if (_isEncrypted) {
+      value = await cryptoService.encrypt(value);
+    }
+    settingData = {
+      'value': value,
+      'isEncrypted': _isEncrypted,
+    };
+    String key = widget.title ;
+    // MapをJSON文字列に変換して保存
+    String jsonValue = jsonEncode(settingData);
+    await storage.write(key: key, value: jsonValue);
+    print(jsonValue);
+    return true;
   }
 
   @override
@@ -42,11 +67,8 @@ class TextSettingItemWidgetState extends State<TextSettingItemWidget> {
           subtitle: TextField(
             controller: _controller,
             onChanged: (newValue) {
-              if (_isEncrypted) {
-                // newValueを暗号化して表示・保存するロジックをここに実装
-              } else {
-                // 暗号化せずに保存するロジックをここに実装
-              }
+                  _value = newValue; // 修正: _valueを更新
+                  _controller.text = newValue; 
             },
             obscureText: _isEncrypted, // パスワードのような値を隠す場合に有効
           ),

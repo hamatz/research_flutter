@@ -165,18 +165,17 @@ class ChatService {
                     if (parsedData['choices'] != null &&
                         parsedData['choices'].isNotEmpty) {
                       String? content = parsedData['choices'][0]['delta']['content'];
-                      print('content: $parsedData');
-
+                      //print('content: $parsedData');
                       if (content != null) { // データの中身の存在確認はするけどChunkそのまま返した方が便利だと思うので敢えてこっちをセットしてる
                         collectedChunks.add(parsedData);
-                        controller.add(parsedData);
                       }
+                      controller.add(parsedData);
                     }
                     bufferedChunk = bufferedChunk.replaceFirst(singleChunk, "");
                   }
           },
           onDone: () {
-            controller.add(collectedChunks);
+            //controller.add(collectedChunks);
             controller.close();
           } ,
           onError: (error) => controller.addError('Error: $error'),
