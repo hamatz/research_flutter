@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:chat_sample_app/src/services/chat_service.dart' as cs;
+import 'package:chat_sample_app/src/services/chat_service.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:chat_sample_app/src/screens/setting_view.dart' as setting_view;
 import 'package:chat_sample_app/src/services/crypt_service.dart';
@@ -24,10 +24,11 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
 
-  late cs.ChatService chatService;
+  late ChatService chatService;
   final storage = FlutterSecureStorage();
   final cryptoService = CryptoService();
-  List<String> messages = [];
+  //List<String> messages = [];
+  List<ChatMessage> chatMessages=[];
   List<String> collectedChunks = []; 
   TextEditingController messageController = TextEditingController();
   String currentResponse = ""; // 現在のAPI応答を保持するための変数
@@ -38,9 +39,9 @@ class _ChatPageState extends State<ChatPage> {
   String azureOpenaiEndpointUrl="";
   StreamSubscription? _settingsUpdatedSubscription;
   String result="";
-  bool is_user_typing=true;
+  bool isUserTyping=true;
 
-  late final cs.ChatRequest request; 
+  late final ChatRequest request; 
 
   @override
   void initState() {
@@ -69,7 +70,7 @@ class _ChatPageState extends State<ChatPage> {
               deploymentName: azureDeploymentName,
               apiVersion: azureApiVersion,
           );
-          chatService = cs.ChatService(
+          chatService = ChatService(
             endpoint: azureOpenaiEndpointUrl,
             apiKey: azureOpenaiKey,
           );
@@ -118,17 +119,17 @@ class _ChatPageState extends State<ChatPage> {
     final String endpoint = 'https://$endpointBaseUrl.openai.azure.com/openai/deployments/$deploymentName/chat/completions?api-version=$apiVersion';
     return endpoint;
   }
-  void fetchChatResponses(cs.ChatRequest request) async {
+  void fetchChatResponses(ChatRequest request) async {
     currentResponse = ""; // 新しい応答の取得を開始する前にリセット
     chatService.chat(request).listen((response) {
-        is_user_typing = false;
+        isUserTyping = false;
         if (response['choices'][0]['delta']['content'] != null && response['choices'][0]['delta']['content'].isNotEmpty) {
           setState(() {
             // 既存のメッセージアイテムを更新するか、新しいメッセージアイテムを追加
             if (currentResponse.isEmpty) {
-              messages.add(response['choices'][0]['delta']['content']); // 初めてのチャンクの場合、新しいメッセージとして追加
+              chatMessages.add(ChatMessage(messageType: MessageType.assistant, content: response['choices'][0]['delta']['content'])); // 初めてのチャンクの場合、新しいメッセージとして追加
             } else {
-              messages[messages.length - 1] = currentResponse + response['choices'][0]['delta']['content']; // 既存のメッセージを更新
+              chatMessages[chatMessages.length - 1].content = currentResponse + response['choices'][0]['delta']['content']; // 既存のメッセージを更新
             }
             currentResponse += response['choices'][0]['delta']['content']; // 現在の応答にチャンクを追加
           });
@@ -163,13 +164,13 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Expanded(
             child: ListView.builder(
-              itemCount: messages.length,
+              itemCount: chatMessages.length,
               itemBuilder: (context, index) {
                 return Card(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: MarkdownBody(
-                      data: messages[index],
+                      data: chatMessages[index].content,
                     ),
                   ),
                 );
@@ -186,20 +187,20 @@ class _ChatPageState extends State<ChatPage> {
               onChanged: (text) {
                 // 入力が始まったら、リアルタイムで表示を更新
                 setState(() {
-                  if (messages.isEmpty || messages.last != text) {
-                    if (messages.isNotEmpty && is_user_typing) {
-                      messages.removeLast();
+                  if (chatMessages.isEmpty || chatMessages.last.content != text) {
+                    if (chatMessages.isNotEmpty && isUserTyping) {
+                      chatMessages.removeLast();
                     }else{
-                      is_user_typing = true;
+                      isUserTyping = true;
                     }
-                    messages.add(text);
+                    chatMessages.add(ChatMessage(messageType: MessageType.user, content: text));
                   }
                 });
               },
               onSubmitted: (text) {
-                cs.ChatRequest newRequest = cs.ChatRequest(
+                ChatRequest newRequest = ChatRequest(
                   model: azureDeploymentName,
-                  messages: [cs.ChatMessage(messageType: cs.MessageType.user, content: text)],
+                  messages: chatMessages,
                   maxTokens: 500,
                   stream: true,
                 );
