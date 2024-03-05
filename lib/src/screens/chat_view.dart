@@ -63,8 +63,6 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _loadInitialSettings() async {
     await resolveSettingInfo();
     setState(() {
-          // print("Setting Info was updated!");
-          // print("azureApiBase: $azureApiBaseUrl");
           azureOpenaiEndpointUrl = constructAzureOpenAIEndpoint(
               endpointBaseUrl: azureApiBaseUrl,
               deploymentName: azureDeploymentName,
@@ -74,7 +72,6 @@ class _ChatPageState extends State<ChatPage> {
             endpoint: azureOpenaiEndpointUrl,
             apiKey: azureOpenaiKey,
           );
-          // print("設定情報が読み込まれました");
     });
   }
   Future<void> resolveSettingInfo() async {
@@ -139,7 +136,6 @@ class _ChatPageState extends State<ChatPage> {
       // エラー処理...
     }, onDone: () {
     // ストリームが終了したことを示す処理
-      //messages.add(currentResponse);
       print("Stream completed");
     });
   }
@@ -166,11 +162,38 @@ class _ChatPageState extends State<ChatPage> {
             child: ListView.builder(
               itemCount: chatMessages.length,
               itemBuilder: (context, index) {
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: MarkdownBody(
-                      data: chatMessages[index].content,
+                final chatMessage = chatMessages[index];
+                Color backgroundColor; 
+                Color textColor; 
+                EdgeInsets padding;
+                switch (chatMessage.messageType) {
+                  case MessageType.user:
+                    backgroundColor = Colors.blue[100]!;
+                    textColor = Colors.black;
+                    padding = EdgeInsets.only(left: 20, right: 80, top: 8, bottom: 8);
+                    break;
+                  case MessageType.assistant:
+                    backgroundColor = Colors.green[100]!; // リプライは緑色系で表示
+                    textColor = Colors.black;
+                    padding = EdgeInsets.only(left: 80, right: 20, top: 8, bottom: 8); // アシスタント側に寄せる
+                    break;
+                  default: // systemなど他のmessageTypeの場合
+                    backgroundColor = Colors.grey[200]!;
+                    textColor = Colors.black;
+                    padding = EdgeInsets.all(8); // デフォルトのパディング
+                }
+                return Padding(
+                  padding: padding,
+                  child: Card(
+                    color: backgroundColor, // 背景色を適用
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: MarkdownBody(
+                        data: chatMessage.content,
+                        styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                          p: Theme.of(context).textTheme.bodyText2!.copyWith(color: textColor), // テキスト色を適用
+                        ),
+                      ),
                     ),
                   ),
                 );
