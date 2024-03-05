@@ -38,6 +38,7 @@ class _ChatPageState extends State<ChatPage> {
   String azureOpenaiEndpointUrl="";
   StreamSubscription? _settingsUpdatedSubscription;
   String result="";
+  bool is_user_typing=true;
 
   late final cs.ChatRequest request; 
 
@@ -120,6 +121,7 @@ class _ChatPageState extends State<ChatPage> {
   void fetchChatResponses(cs.ChatRequest request) async {
     currentResponse = ""; // 新しい応答の取得を開始する前にリセット
     chatService.chat(request).listen((response) {
+        is_user_typing = false;
         if (response['choices'][0]['delta']['content'] != null && response['choices'][0]['delta']['content'].isNotEmpty) {
           setState(() {
             // 既存のメッセージアイテムを更新するか、新しいメッセージアイテムを追加
@@ -136,7 +138,7 @@ class _ChatPageState extends State<ChatPage> {
       // エラー処理...
     }, onDone: () {
     // ストリームが終了したことを示す処理
-      messages.add(currentResponse);
+      //messages.add(currentResponse);
       print("Stream completed");
     });
   }
@@ -185,8 +187,10 @@ class _ChatPageState extends State<ChatPage> {
                 // 入力が始まったら、リアルタイムで表示を更新
                 setState(() {
                   if (messages.isEmpty || messages.last != text) {
-                    if (messages.isNotEmpty) {
+                    if (messages.isNotEmpty && is_user_typing) {
                       messages.removeLast();
+                    }else{
+                      is_user_typing = true;
                     }
                     messages.add(text);
                   }
