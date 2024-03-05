@@ -35,8 +35,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
     await (profileItemKey.currentState as UserProfileSettingItemState?)?.save();
 
-    // 保存処理が完了した後にイベントを発火
-    eventBus.fire(SettingsUpdatedEvent());
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('新しい設定が保存されました')));
 
@@ -44,9 +42,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     var loadedSettings = await loadSettings();
     if(mounted){
       setState(() {
-        settings = loadedSettings;
+        settingsFuture = Future.value(loadedSettings);
       });
     }
+    // 保存処理が完了した後にイベントを発火
+    eventBus.fire(SettingsUpdatedEvent());
   }
   Future<List<SettingItem>> loadSettings() async {
     List<SettingItem> loadedSettings = [];

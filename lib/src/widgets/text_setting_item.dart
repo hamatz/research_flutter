@@ -19,19 +19,25 @@ class TextSettingItemWidgetState extends State<TextSettingItemWidget> {
   final cryptoService = CryptoService();
   final storage = FlutterSecureStorage();
   late bool _isEncrypted;
-  late String _value;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.value);
     _isEncrypted = widget.isEncrypted;
-    _value = widget.value;
+  }
+
+  @override
+  void didUpdateWidget(TextSettingItemWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value) {
+      _controller.text = widget.value;
+    }
   }
 
   Future<bool> save() async {
     Map<String, dynamic> settingData = {};
-    String value = _value;;
+    String value = _controller.text;
     if (_isEncrypted) {
       value = await cryptoService.encrypt(value);
     }
@@ -43,7 +49,6 @@ class TextSettingItemWidgetState extends State<TextSettingItemWidget> {
     // MapをJSON文字列に変換して保存
     String jsonValue = jsonEncode(settingData);
     await storage.write(key: key, value: jsonValue);
-    print(jsonValue);
     return true;
   }
 
@@ -67,10 +72,9 @@ class TextSettingItemWidgetState extends State<TextSettingItemWidget> {
           subtitle: TextField(
             controller: _controller,
             onChanged: (newValue) {
-                  _value = newValue; // 修正: _valueを更新
                   _controller.text = newValue; 
             },
-            obscureText: _isEncrypted, // パスワードのような値を隠す場合に有効
+            obscureText: _isEncrypted,
           ),
         ),
       ],
