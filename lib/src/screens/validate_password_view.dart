@@ -27,6 +27,9 @@ class ValidatePasswordScreen extends StatelessWidget {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => chat_view.ChatPage()),
         );
+      }else{
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('パスワードエラーです。再度入力してください')));
       }
     }
     return Scaffold(
