@@ -9,6 +9,7 @@ import 'package:chat_sample_app/src/services/crypt_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:chat_sample_app/src/global.dart';
 import 'package:chat_sample_app/src/services/setting_update_event.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MessagePair {
   String question;
@@ -16,6 +17,16 @@ class MessagePair {
 
   MessagePair({this.question = "", this.response = ""});
 }
+
+void _launchURL(String url) async {
+    final Uri _url = Uri.parse(url);
+    if (await canLaunchUrl(_url)) {
+      await launchUrl(_url);
+    } else {
+      throw 'Could not launch $url';
+    }
+}
+
 
 class ChatPage extends StatefulWidget {
   @override
@@ -55,6 +66,7 @@ class _ChatPageState extends State<ChatPage> {
     _settingsUpdatedSubscription?.cancel();
     super.dispose();
   }
+
   void _subscribeToSettingsUpdate() {
     _settingsUpdatedSubscription = eventBus.on<SettingsUpdatedEvent>().listen((event) {
       _loadInitialSettings();
@@ -190,6 +202,9 @@ class _ChatPageState extends State<ChatPage> {
                       padding: const EdgeInsets.all(8.0),
                       child: MarkdownBody(
                         data: chatMessage.content,
+                        onTapLink: (text, url, title) {
+                          if (url != null) _launchURL(url);
+                        },
                         styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
                           p: Theme.of(context).textTheme.bodyText2!.copyWith(color: textColor), // テキスト色を適用
                         ),
