@@ -6,13 +6,8 @@ import 'package:chat_sample_app/src/screens/validate_password_view.dart';
 Future<bool> isFirstLaunch() async {
   final prefs = await SharedPreferences.getInstance();
   final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
-
-  if (isFirstLaunch) {
-    await prefs.setBool('isFirstLaunch', false);
-  }
   return isFirstLaunch;
 }
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   bool firstLaunch = await isFirstLaunch();
@@ -46,8 +41,8 @@ class _SplashScreenState extends State<SplashScreen> {
   void _navigateToNext() async {
     final prefs = await SharedPreferences.getInstance();
     final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
-     await Future.delayed(Duration(seconds: 3)); 
-
+    await Future.delayed(Duration(seconds: 3)); 
+    
     if (isFirstLaunch) {
       await prefs.setBool('isFirstLaunch', false);
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RegisterPasswordScreen()));
