@@ -1,0 +1,21 @@
+{
+    "ログイン画面": "login_view",
+    "Landing Page": "lp_view",
+    "ホーム画面": "home_view",
+    "パスワードリセット画面": "pasword_reset_view",
+    "ユーザー登録": "user_registration_view",
+    "ユーザー基本情報登録画面": "user_profile_registration_view",
+    "登録完了画面": "registration_complete_view",
+    "ユーザー情報更新画面": "user_profile_update_view",
+    "友だちリスト表示画面": "friend_list_view",
+    "設定画面": "settings_view",
+    "通知画面": "notification_view",
+    "プロフィール編集画面": "profile_edit_view",
+    "アカウント削除画面": "account_deletion_view",
+    "プライバシーポリシー・利用規約画面": "privacy_policy_view",
+    "友だち情報詳細画面": "friend_detail_view",
+    "友だち追加画面": "add_friend_view",
+    "メモ情報編集画面": "memo_edit_view",
+    "メモ削除": "memo_delete_view",
+    "友だちリクエスト一覧画面": "friend_request_list_view"
+}
